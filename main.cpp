@@ -34,8 +34,9 @@ int main() {
     cv::Mat imgLeft = cv::imread(pathLeft, cv::IMREAD_COLOR);
     cv::Mat imgRight = cv::imread(pathRight, cv::IMREAD_COLOR);
 
+    // 显示校正前的图像
     cv::Mat mergeBeforeRectify;
-    cv::hconcat(imgLeft, imgLeft, mergeBeforeRectify);
+    cv::hconcat(imgLeft, imgRight, mergeBeforeRectify);
     for (int i = 0; i < imageSize.height; i += 32) {
         line(mergeBeforeRectify, cv::Point(0, i), cv::Point(2 * imageSize.width, i), cv::Scalar(0, 0, 255), 1, 8);
     }
@@ -58,7 +59,7 @@ int main() {
     rectangle(imgLeftRectify, validPixROI1, cv::Scalar(0, 255, 0));
     rectangle(imgRightRectify, validPixROI2, cv::Scalar(0, 255, 0));
 
-
+    // 显示校正后的图像
     cv::Mat mergeAfterRectify;
     cv::hconcat(imgLeftRectify, imgRightRectify, mergeAfterRectify);
     for (int i = 0; i < imageSize.height; i += 32) {
