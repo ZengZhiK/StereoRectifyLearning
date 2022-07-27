@@ -1,7 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
-int main() {
+int main01() {
     // 相机内参、外参
     cv::Mat KLeft = (cv::Mat_<double>(3, 3)
             <<
@@ -29,8 +29,8 @@ int main() {
     cv::Size imageSize = cv::Size(640, 480);
 
     // 读取影像
-    std::string pathLeft = R"(..\data\left\Left1.bmp)";
-    std::string pathRight = R"(..\data\right\Right1.bmp)";
+    std::string pathLeft = R"(..\data\left\Left0103.bmp)";
+    std::string pathRight = R"(..\data\right\Right0103.bmp)";
     cv::Mat imgLeft = cv::imread(pathLeft, cv::IMREAD_COLOR);
     cv::Mat imgRight = cv::imread(pathRight, cv::IMREAD_COLOR);
 
@@ -56,6 +56,10 @@ int main() {
     initUndistortRectifyMap(KRight, DRight, R2, P2, imageSize, CV_32FC1, rmap[1][0], rmap[1][1]);
     remap(imgLeft, imgLeftRectify, rmap[0][0], rmap[0][1], CV_INTER_AREA);//左校正
     remap(imgRight, imgRightRectify, rmap[1][0], rmap[1][1], CV_INTER_AREA);//右校正
+
+    cv::imwrite("../result/left.bmp", imgLeftRectify);
+    cv::imwrite("../result/right.bmp", imgRightRectify);
+
     rectangle(imgLeftRectify, validPixROI1, cv::Scalar(0, 255, 0));
     rectangle(imgRightRectify, validPixROI2, cv::Scalar(0, 255, 0));
 
