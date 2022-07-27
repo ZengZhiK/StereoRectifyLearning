@@ -41,14 +41,14 @@ int main01() {
         line(mergeBeforeRectify, cv::Point(0, i), cv::Point(2 * imageSize.width, i), cv::Scalar(0, 0, 255), 1, 8);
     }
     cv::imshow("BeforeRectify", mergeBeforeRectify);
-
+    cv::imwrite("../result/BeforeRectify.bmp", mergeBeforeRectify);
 
     // 计算旋转矩阵和投影矩阵
     cv::Mat R1, R2, P1, P2, Q, imgLeftRectify, imgRightRectify;
     cv::Rect validPixROI1, validPixROI2;   //左右相机立体修正后有效像素的区域
     cv::stereoRectify(KLeft, DLeft, KRight, DRight,
                       imageSize, R, T, R1, R2, P1, P2, Q,
-                      cv::CALIB_ZERO_DISPARITY, 1, imageSize,
+                      cv::CALIB_ZERO_DISPARITY, 0, imageSize,
                       &validPixROI1, &validPixROI2);
     // 计算映射
     cv::Mat rmap[2][2];
@@ -70,5 +70,6 @@ int main01() {
         line(mergeAfterRectify, cv::Point(0, i), cv::Point(2 * imageSize.width, i), cv::Scalar(0, 0, 255), 1, 8);
     }
     cv::imshow("AfterRectify", mergeAfterRectify);
+    cv::imwrite("../result/AfterRectify.bmp", mergeAfterRectify);
     cv::waitKey(0);
 }
