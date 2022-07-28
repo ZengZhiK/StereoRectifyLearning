@@ -32,11 +32,11 @@ void drawLines(cv::Mat &img1, cv::Mat &img2,
     }
 }
 
-int main() {
-//    std::string pathLeft = R"(..\data\left\Left0103.bmp)";
-//    std::string pathRight = R"(..\data\right\Right0103.bmp)";
-    std::string pathLeft = R"(..\result\left.bmp)";
-    std::string pathRight = R"(..\result\right.bmp)";
+int main02() {
+    std::string pathLeft = R"(..\data\left\Left0103.bmp)";
+    std::string pathRight = R"(..\data\right\Right0103.bmp)";
+//    std::string pathLeft = R"(..\result\left.bmp)";
+//    std::string pathRight = R"(..\result\right.bmp)";
     cv::Mat imgLeft = cv::imread(pathLeft, cv::IMREAD_GRAYSCALE);
     cv::Mat imgRight = cv::imread(pathRight, cv::IMREAD_GRAYSCALE);
 
@@ -67,7 +67,8 @@ int main() {
         }
     }
     //首先根据对应点计算出两视图的基础矩阵，基础矩阵包含了两个相机的外参数关系
-    cv::Mat fundamental_matrix = findFundamentalMat(ptsLeft, ptsRight, cv::FM_LMEDS);
+    cv::Mat fundamental_matrix = findFundamentalMat(ptsLeft, ptsRight, cv::FM_8POINT);
+    std::cout << "fundamentalMatrix: " << std::endl << fundamental_matrix << std::endl;
 
     //计算对应点的外极线epilines是一个三元组(a,b,c)，表示点在另一视图中对应的外极线ax+by+c=0;
     std::vector<cv::Vec<float, 3>> epipolarLeft, epipolarRight;

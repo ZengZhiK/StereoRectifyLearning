@@ -1,7 +1,70 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
-int main01() {
+/**
+ *
+ * @param KLeft             左相机内参-输入
+ * @param KRight            右相机内参-输入
+ * @param R                 外参-输入
+ * @param T                 外参-输入
+ * @param fundamentalMatrix 基本矩阵-输出
+ */
+void calcFundamentalMat(const cv::Mat &KLeft, const cv::Mat &KRight,
+                        const cv::Mat &R, const cv::Mat &T,
+                        cv::Mat &fundamentalMatrix) {
+    cv::Mat T_ = (cv::Mat_<double>(3, 3)
+            <<
+            0, -T.at<double>(2), T.at<double>(1),
+            T.at<double>(2), 0, -T.at<double>(0),
+            -T.at<double>(1), T.at<double>(0), 0
+    );
+
+    fundamentalMatrix = KRight.inv().t() * T_ * R * KLeft.inv();
+}
+
+/**
+ *
+ * @param imgLeft           图像1-输入
+ * @param imgRight          图像2-输入
+ * @param fundamentalMatrix 基本矩阵
+ * @param outLeft           绘制好极线的图像1-输出
+ * @param outRight          绘制好极线的图像2-输出
+ */
+void drawLines(const cv::Mat &imgLeft, const cv::Mat &imgRight, const cv::Mat &fundamentalMatrix,
+               cv::Mat &outLeft, cv::Mat &outRight) {
+    outLeft = imgLeft.clone();
+    outRight = imgRight.clone();
+    int r = imgLeft.rows, c = imgLeft.cols;
+
+    std::vector<cv::Point2i> ptsLeft, ptsRight;
+    std::vector<cv::Vec<float, 3>> epipolarLeft, epipolarRight;
+
+    for (int i = 0; i < r; i += 32) {
+        ptsLeft.emplace_back(0, i);
+    }
+    computeCorrespondEpilines(ptsLeft, 1, fundamentalMatrix, epipolarRight);
+
+    cv::RNG &rng = cv::theRNG();
+    std::vector<cv::Scalar> colors;
+    for (int i = 0; i < epipolarRight.size(); i++) {
+        //随机产生颜色
+        cv::Scalar color = cv::Scalar(rng(255), rng(255), rng(255));
+        colors.push_back(color);
+        ptsRight.emplace_back(0, -epipolarRight[i][2] / epipolarRight[i][1]);
+        line(outRight, cv::Point2i(0, -epipolarRight[i][2] / epipolarRight[i][1]),
+             cv::Point2i(c, -(epipolarRight[i][2] + epipolarRight[i][0] * c) / epipolarRight[i][1]), color);
+    }
+
+    computeCorrespondEpilines(ptsRight, 2, fundamentalMatrix, epipolarLeft);
+    for (int i = 0; i < epipolarLeft.size(); i++) {
+        //随机产生颜色
+        cv::Scalar color = cv::Scalar(rng(255), rng(255), rng(255));
+        line(outLeft, cv::Point2i(0, -epipolarLeft[i][2] / epipolarLeft[i][1]),
+             cv::Point2i(c, -(epipolarLeft[i][2] + epipolarLeft[i][0] * c) / epipolarLeft[i][1]), colors.at(i));
+    }
+}
+
+int main() {
     // 相机内参、外参
     cv::Mat KLeft = (cv::Mat_<double>(3, 3)
             <<
@@ -24,7 +87,12 @@ int main01() {
             << 0.00189, -0.00040, 0.00653);
     cv::Mat R;
     cv::Rodrigues(om, R);
+    std::cout << "R: " << std::endl << R << std::endl;
     cv::Mat T = (cv::Mat_<double>(3, 1) << -89.51204, -0.21901, -0.28905);
+
+    cv::Mat fundamentalMatrix;
+    calcFundamentalMat(KLeft, KRight, R, T, fundamentalMatrix);
+    std::cout << "fundamentalMatrix: " << std::endl << fundamentalMatrix << std::endl;
 
     cv::Size imageSize = cv::Size(640, 480);
 
@@ -43,6 +111,12 @@ int main01() {
     cv::imshow("BeforeRectify", mergeBeforeRectify);
     cv::imwrite("../result/BeforeRectify.bmp", mergeBeforeRectify);
 
+    cv::Mat outLeft, outRight, mergeOutBeforeRectify;
+    drawLines(imgLeft, imgRight, fundamentalMatrix, outLeft, outRight);
+    cv::hconcat(outLeft, outRight, mergeOutBeforeRectify);
+    cv::imshow("OutBeforeRectify", mergeOutBeforeRectify);
+    cv::imwrite("../result/BeforeRectifyEpipolar.bmp", mergeOutBeforeRectify);
+
     // 计算旋转矩阵和投影矩阵
     cv::Mat R1, R2, P1, P2, Q, imgLeftRectify, imgRightRectify;
     cv::Rect validPixROI1, validPixROI2;   //左右相机立体修正后有效像素的区域
@@ -59,6 +133,20 @@ int main01() {
 
     cv::imwrite("../result/left.bmp", imgLeftRectify);
     cv::imwrite("../result/right.bmp", imgRightRectify);
+
+    cv::Mat K = (KLeft + KRight) / 2, mergeOutAfterRectify;
+    calcFundamentalMat(K, K,
+                       cv::Mat::eye(3, 3, CV_64FC1),
+                       (cv::Mat_<double>(3, 1) << -std::sqrt(
+                               T.at<double>(0) * T.at<double>(0) +
+                               T.at<double>(1) * T.at<double>(1) +
+                               T.at<double>(2) * T.at<double>(2)), 0, 0),
+                       fundamentalMatrix);
+    std::cout << "fundamentalMatrix: " << std::endl << fundamentalMatrix << std::endl;
+    drawLines(imgLeftRectify, imgRightRectify, fundamentalMatrix, outLeft, outRight);
+    cv::hconcat(outLeft, outRight, mergeOutAfterRectify);
+    cv::imshow("OutAfterRectify", mergeOutAfterRectify);
+    cv::imwrite("../result/AfterRectifyEpipolar.bmp", mergeOutAfterRectify);
 
     rectangle(imgLeftRectify, validPixROI1, cv::Scalar(0, 255, 0));
     rectangle(imgRightRectify, validPixROI2, cv::Scalar(0, 255, 0));
