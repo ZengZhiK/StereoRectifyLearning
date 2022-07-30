@@ -33,10 +33,12 @@ void drawLines(cv::Mat &img1, cv::Mat &img2,
 }
 
 int main02() {
-    std::string pathLeft = R"(..\data\left\Left0103.bmp)";
-    std::string pathRight = R"(..\data\right\Right0103.bmp)";
-//    std::string pathLeft = R"(..\result\left.bmp)";
-//    std::string pathRight = R"(..\result\right.bmp)";
+//    std::string pathLeft = R"(..\data\left\Left0103.bmp)";
+//    std::string pathRight = R"(..\data\right\Right0103.bmp)";
+    std::string pathLeft = R"(..\result\left.bmp)";
+    std::string pathRight = R"(..\result\right.bmp)";
+//    std::string pathLeft = R"(..\data\left\Sport0_OG0.bmp)";
+//    std::string pathRight = R"(..\data\right\Sport1_OG0.bmp)";
     cv::Mat imgLeft = cv::imread(pathLeft, cv::IMREAD_GRAYSCALE);
     cv::Mat imgRight = cv::imread(pathRight, cv::IMREAD_GRAYSCALE);
 
@@ -60,7 +62,7 @@ int main02() {
     std::vector<cv::DMatch> goodMatches;
     std::vector<cv::Point2i> ptsLeft, ptsRight;
     for (size_t i = 0; i < matches.size(); i++) {
-        if (matches[i][0].distance < 0.3 * matches[i][1].distance) {
+        if (matches[i][0].distance < 0.1 * matches[i][1].distance) {
             goodMatches.push_back(matches[i][0]);
             ptsLeft.push_back(kpLeft[matches[i][0].queryIdx].pt);
             ptsRight.push_back(kpRight[matches[i][0].trainIdx].pt);
