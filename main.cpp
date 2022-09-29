@@ -128,8 +128,8 @@ int main() {
     cv::Mat rmap[2][2];
     initUndistortRectifyMap(KLeft, DLeft, R1, P1, imageSize, CV_32FC1, rmap[0][0], rmap[0][1]);
     initUndistortRectifyMap(KRight, DRight, R2, P2, imageSize, CV_32FC1, rmap[1][0], rmap[1][1]);
-    remap(imgLeft, imgLeftRectify, rmap[0][0], rmap[0][1], CV_INTER_AREA);//左校正
-    remap(imgRight, imgRightRectify, rmap[1][0], rmap[1][1], CV_INTER_AREA);//右校正
+    remap(imgLeft, imgLeftRectify, rmap[0][0], rmap[0][1], CV_INTER_LINEAR);//左校正
+    remap(imgRight, imgRightRectify, rmap[1][0], rmap[1][1], CV_INTER_LINEAR);//右校正
 
     cv::imwrite("../result/left.bmp", imgLeftRectify);
     cv::imwrite("../result/right.bmp", imgRightRectify);
