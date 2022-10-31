@@ -106,7 +106,7 @@ int main() {
     cv::Mat mergeBeforeRectify;
     cv::hconcat(imgLeft, imgRight, mergeBeforeRectify);
     for (int i = 0; i < imageSize.height; i += 32) {
-        line(mergeBeforeRectify, cv::Point(0, i), cv::Point(2 * imageSize.width, i), cv::Scalar(0, 0, 255), 1, 8);
+        line(mergeBeforeRectify, cv::Point(0, i), cv::Point(2 * imageSize.width, i), cv::Scalar(0, 0, 255), 1, cv::LINE_8);
     }
     cv::imshow("BeforeRectify", mergeBeforeRectify);
     cv::imwrite("../result/BeforeRectify.bmp", mergeBeforeRectify);
